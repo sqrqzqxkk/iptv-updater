@@ -7,11 +7,10 @@ KAYNAKLAR = [
 ]
 
 # -------------------------------------------------------------------------
-# BURADAKİ SIRALAMA TELEVİZYONDA BİREBİR AYNI ŞEKİLDE ÇIKACAK kanka:
-# TRT 1 birinci sırada, ATV ikinci sırada olacak şekilde ayarlandı.
+# SADECE HAVUZDAN ÇEKİLECEK DİĞER KANALLAR
+# TRT 1, TRT Spor ve CNN Türk'ü özel kazıdığımız için bu listeden çıkardık.
 # -------------------------------------------------------------------------
 TUTULACAK_KANALLAR = [
-    "TRT 1 (1080p)",
     "ATV (1080p)",
     "Kanal D (1080p)",
     "NOW TV (720p)",
@@ -23,12 +22,29 @@ TUTULACAK_KANALLAR = [
     "A Haber (1080p)",
     "Habertürk TV (1080p)",
     "NTV (720p) [Not 24/7]",
-    "ATV Avrupa (576p) [Not 24/7]",
-    "Euro D (720p)",
+    "TRT Belgesel (720p)",
     "A2TV (1080p)",
-    "A Spor (1080p)",
-    "TRT Belgesel (720p)"
+    "Euro D (720p)",
+    "ATV Avrupa (576p) [Not 24/7]"
 ]
+
+def trt1_guncel_link_bul():
+    """ TRT 1 sitesinden yurt dışı engelini aşan güncel m3u8 linkini kazır """
+    try:
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
+        # TRT'nin resmi canlı yayın izleme sayfası
+        url = "https://www.trtizle.com/canli/tv/trt-1"
+        response = requests.get(url, headers=headers, timeout=15)
+        if response.status_code == 200:
+            # Sayfa kaynağındaki daioncdn m3u8 linkini arıyoruz
+            match = re.search(r'(https://trt\.daioncdn\.net/trt1/[^"\']+\.m3u8\?[^"\']+)', response.text)
+            if match:
+                print("Başarılı: Yurt dışı uyumlu TRT 1 Linki Bulundu.")
+                return match.group(1).replace("\\/", "/")
+    except Exception as e:
+        print(f"TRT 1 canlı linki kazınırken hata oluştu: {e}")
+    # Siteden çekemezse yurt dışına açık genel CDN yedek linki:
+    return "https://tv-trt1.medya.trt.com.tr/master.m3u8"
 
 def cnn_turk_guncel_link_bul():
     try:
@@ -57,12 +73,13 @@ def trt_spor_guncel_link_bul():
     return "https://trt.daioncdn.net/trtspor/master_720p.m3u8?platform=trtspor&sid=8kbjje2e022o&app=9b65474e-8197-4899-aabb-321fcf6dd9eb&ce=2"
 
 def listeyi_guncelle():
+    # Dinamik olarak canlı/yurt dışı uyumlu linkleri çekiyoruz
+    trt1_linki = trt1_guncel_link_bul()
     cnn_linki = cnn_turk_guncel_link_bul()
     trt_spor_linki = trt_spor_guncel_link_bul()
 
-    # Önce havuzdaki tüm kanalları geçici bir hafızaya (sözlüğe) topluyoruz
+    # Önce havuzdaki diğer kanalları geçici hafızaya alıyoruz
     havuz_kanallari = {}
-    
     for url in KAYNAKLAR:
         try:
             response = requests.get(url, timeout=15)
@@ -83,23 +100,22 @@ def listeyi_guncelle():
         except Exception as e:
             print(f"Havuz çekilirken hata oluştu: {e}")
 
-    # Dosya yazma sırasını burası belirliyor
+    # SIRALAMA BAŞLIYOR: TRT 1'i en canlı haliyle en başa çakıyoruz
     ozel_kanallar = "#EXTM3U\n"
-    eklenen_linkler = set()
+    ozel_kanallar += f'#EXTINF:-1 tvg-id="TRT1.tr" tvg-name="TRT 1" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/TRT_1_logo_%282021-%29.svg/960px-TRT_1_logo_%282021-%29.svg.png",TRT 1 (1080p)\n{trt1_linki}\n'
+    
+    eklenen_linkler = set([trt1_linki, cnn_linki, trt_spor_linki])
 
-    # SIRALAMA MOTORU: Kanalları senin listedeki sırayla tek tek çeker
+    # Diğer ulusal kanalları sırayla ekliyoruz
     for aranacak_kanal in TUTULACAK_KANALLAR:
         kanal_key = aranacak_kanal.strip().lower()
-        
-        # Havuzda bu isimde kanal varsa sırayla listeye ekle
         if kanal_key in havuz_kanallari:
             extinf, link = havuz_kanallari[kanal_key]
             if link not in eklenen_linkler:
                 ozel_kanallar += extinf + "\n" + link + "\n"
                 eklenen_linkler.add(link)
 
-    # Canlı sitelerden kazınan TRT Spor ve CNN Türk'ü de listenin EN ALTINA ekliyoruz.
-    # (Eğer listenin EN BAŞINDA olmasını istersen bu iki bloğu yukarıdaki #EXTM3U satırının hemen altına taşıyabiliriz kanka)
+    # TRT Spor ve CNN Türk'ü de listenin altına canlı kazınmış halleriyle ekliyoruz
     if trt_spor_linki not in eklenen_linkler:
         ozel_kanallar += f'#EXTINF:-1 tvg-id="TRTSpor.tr" tvg-name="TRT Spor" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/e/ec/TRT_Spor_logo.png",TRT Spor\n{trt_spor_linki}\n'
     if cnn_linki not in eklenen_linkler:
@@ -107,7 +123,7 @@ def listeyi_guncelle():
 
     with open("iptv_listem.m3u", "w", encoding="utf-8") as f:
         f.write(ozel_kanallar.strip())
-    print("İşlem başarılı! Kanallar listendeki sırayla jilet gibi dizildi.")
+    print("İşlem başarılı! TRT 1 yurt dışı koruması aşılarak başa eklendi.")
 
 if __name__ == "__main__":
     listeyi_guncelle()
