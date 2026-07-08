@@ -1,7 +1,10 @@
+import requests
+import re
+
 def listeyi_guncelle():
     # -------------------------------------------------------------------------
-    # YURT DIŞINDA (AVUSTURYA'DA) %100 ÇAŞILAN ENGELSİZ AVRUPA VE ULUSAL YAYINLAR
-    # CNN Türk jilet gibi tam sırasına geri eklendi!
+    # YURT DIŞINDA (AVUSTURYA'DA) %100 ÇALIŞAN ENGELSİZ AVRUPA VE ULUSAL YAYINLAR
+    # Kanallar tam senin istediğin sıralamaya göre dizildi.
     # -------------------------------------------------------------------------
     m3u_icerik = """#EXTM3U
 #EXTINF:-1 tvg-id="TRT1.tr" tvg-name="TRT 1" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/TRT_1_logo_%282021-%29.svg/960px-TRT_1_logo_%282021-%29.svg.png",TRT 1 (Avrupa / Engelsiz)
@@ -40,4 +43,13 @@ https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/a2tv/a2tv.m3u8
 https://tv-trtspor.medya.trt.com.tr/master.m3u8
 #EXTINF:-1 tvg-id="ASpor.tr" tvg-name="A Spor" tvg-logo="https://i.imgur.com/ZhkZzLf.png",A Spor (1080p)
 https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8
-#EXTINF:-1 tvg-id="TRTBelgesel.tr" tvg-name="TRT Belgesel" tvg-logo="
+#EXTINF:-1 tvg-id="TRTBelgesel.tr" tvg-name="TRT Belgesel" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/TRT_Belgesel_logo_%282019-%29.svg/960px-TRT_Belgesel_logo_%282019-%29.svg.png",TRT Belgesel (720p)
+https://tv-trtbelgesel.medya.trt.com.tr/master.m3u8
+"""
+
+    with open("iptv_listem.m3u", "w", encoding="utf-8") as f:
+        f.write(m3u_icerik.strip())
+    print("İşlem başarılı! Tüm liste yurt dışı uyumlu ve CNN Türk dahil olacak şekilde güncellendi.")
+
+if __name__ == "__main__":
+    listeyi_guncelle()
