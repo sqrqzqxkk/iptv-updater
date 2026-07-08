@@ -1,14 +1,12 @@
-import requests
-import re
-
 def listeyi_guncelle():
     # -------------------------------------------------------------------------
-    # YURT DIŞINDA (AVUSTURYA'DA) %100 ÇALIŞAN ENGELSİZ AVRUPA VE ULUSAL YAYINLAR
-    # Kanallar tam senin istediğin sıralamaya göre dizildi.
+    # SMART IPTV UYUMLU TARAYICI TAKLİTLİ YURT DIŞI LİSTESİ
+    # Linklerin sonundaki '|User-Agent' ve '|Referer' kısımları Smart IPTV'nin 
+    # TRT ve CNN korumalarını tarayıcı gibi davranarak delmesini sağlar.
     # -------------------------------------------------------------------------
     m3u_icerik = """#EXTM3U
 #EXTINF:-1 tvg-id="TRT1.tr" tvg-name="TRT 1" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/TRT_1_logo_%282021-%29.svg/960px-TRT_1_logo_%282021-%29.svg.png",TRT 1 (Avrupa / Engelsiz)
-https://tv-trt1avrupa.medya.trt.com.tr/master.m3u8
+https://tv-trt1avrupa.medya.trt.com.tr/master.m3u8|User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64)&Referer=https://www.trtizle.com/
 #EXTINF:-1 tvg-id="ATV.tr" tvg-name="ATV" tvg-logo="https://i.imgur.com/HyVUwFC.png",ATV (Engelsiz)
 https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv_1080p.m3u8
 #EXTINF:-1 tvg-id="KanalD.tr" tvg-name="Kanal D" tvg-logo="https://i.imgur.com/9o1atM6.png",Kanal D (1080p)
@@ -24,9 +22,9 @@ https://tv8.daioncdn.net/tv8/tv8.m3u8?app=7ddc255a-ef47-4e81-ab14-c0e5f2949788&c
 #EXTINF:-1 tvg-id="EuroStar.tr" tvg-name="EuroStar TV" tvg-logo="https://i.imgur.com/kb165Ot.png",EuroStar TV (Avrupa)
 https://dogus-live.daioncdn.net/eurostar/eurostar.m3u8
 #EXTINF:-1 tvg-id="TRTHaber.tr" tvg-name="TRT Haber" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/TRT_Haber_Eyl%C3%BCl_2020_Logo.svg/960px-TRT_Haber_Eyl%C3%BCl_2020_Logo.svg.png",TRT Haber (720p)
-https://tv-trthaber.medya.trt.com.tr/master.m3u8
+https://tv-trthaber.medya.trt.com.tr/master.m3u8|User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64)&Referer=https://www.trtizle.com/
 #EXTINF:-1 tvg-id="CNNTurk.tr" tvg-name="CNN Türk" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/0/09/CNN_T%C3%BCrk_logo.png",CNN Türk (Engelsiz)
-https://live.duhnet.tv/S2/HLS_LIVE/cnnturknp/track_4_1000/playlist.m3u8?&live=true
+https://live.duhnet.tv/S2/HLS_LIVE/cnnturknp/track_4_1000/playlist.m3u8?&live=true|User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64)&Referer=https://www.cnnturk.com/
 #EXTINF:-1 tvg-id="AHaber.tr" tvg-name="A Haber" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/7/7c/Ahaber_Logo.png",A Haber (1080p)
 https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/ahaber/ahaber.m3u8
 #EXTINF:-1 tvg-id="HaberturkTV.tr" tvg-name="Habertürk TV" tvg-logo="https://i.imgur.com/6Tw3rUp.png",Habertürk TV (1080p)
@@ -40,16 +38,16 @@ https://live.duhnet.tv/S2/HLS_LIVE/eurodnp/playlist.m3u8
 #EXTINF:-1 tvg-id="A2TV.tr" tvg-name="A2TV" tvg-logo="https://iatv.tmgrup.com.tr/site/v2/a2tv/i/a2tv-logo.png",A2TV (1080p)
 https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/a2tv/a2tv.m3u8
 #EXTINF:-1 tvg-id="TRTSpor.tr" tvg-name="TRT Spor" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/e/ec/TRT_Spor_logo.png",TRT Spor
-https://tv-trtspor.medya.trt.com.tr/master.m3u8
+https://tv-trtspor.medya.trt.com.tr/master.m3u8|User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64)&Referer=https://www.trtspor.com.tr/
 #EXTINF:-1 tvg-id="ASpor.tr" tvg-name="A Spor" tvg-logo="https://i.imgur.com/ZhkZzLf.png",A Spor (1080p)
 https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8
 #EXTINF:-1 tvg-id="TRTBelgesel.tr" tvg-name="TRT Belgesel" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/TRT_Belgesel_logo_%282019-%29.svg/960px-TRT_Belgesel_logo_%282019-%29.svg.png",TRT Belgesel (720p)
-https://tv-trtbelgesel.medya.trt.com.tr/master.m3u8
+https://tv-trtbelgesel.medya.trt.com.tr/master.m3u8|User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64)&Referer=https://www.trtizle.com/
 """
 
     with open("iptv_listem.m3u", "w", encoding="utf-8") as f:
         f.write(m3u_icerik.strip())
-    print("İşlem başarılı! Tüm liste yurt dışı uyumlu ve CNN Türk dahil olacak şekilde güncellendi.")
+    print("İşlem başarılı! HTTP Header takviyeli liste oluşturuldu.")
 
 if __name__ == "__main__":
     listeyi_guncelle()
