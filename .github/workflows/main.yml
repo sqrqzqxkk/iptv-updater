@@ -1,0 +1,40 @@
+name: IPTV Linkleri Guncelle
+
+on:
+  schedule:
+    # Her 2 saatte bir otomatik çalışması için Cron zamanlaması (UTC saatine göre)
+    - cron: '0 */2 * * *'
+  workflow_dispatch: # İstediğin zaman elinle de başlatabilmen için buton ekler
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Depodaki kodları GitHub sunucusuna çek
+    - name: Depoyu Kopyala
+      uses: actions/checkout@v3
+
+    # 2. Sunucuya Python kur
+    - name: Python Kur
+      uses: actions/setup-python@v4
+      with:
+        python-node: '3.10'
+
+    # 3. Gerekli kütüphaneleri yükle
+    - name: Kütüphaneleri Yükle
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    # 4. Python botunu çalıştır ve yeni linki al
+    - name: Botu Çalıştır
+      run: python scraper.py
+
+    # 5. Oluşan yeni yayinlarim.m3u dosyasını otomatik olarak depona geri yükle
+    - name: Degisiklikleri Kaydet ve Koda Yukle
+      run: |
+        git config --global user.name 'GitHub Action Bot'
+        git config --global user.email 'action@github.com'
+        git add yayinlarim.m3u
+        git diff --quiet && git diff --staged --quiet || (git commit -m "IPTV Linki Otomatik Güncellendi" && git push)
