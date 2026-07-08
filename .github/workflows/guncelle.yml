@@ -2,34 +2,32 @@ name: IPTV Linklerini Otomatik Güncelle
 
 on:
   schedule:
-    # Her 1 saatte bir otomatik çalışır
-    - cron: '0 * * * *'
-  workflow_dispatch: # İstediğin zaman elle tetiklemek için buton açar
+    # Her gece Türkiye saatiyle 03:00'te (UTC 00:00) otomatik çalıştır
+    - cron: '0 0 * * *'
+  workflow_dispatch: # İstediğinde elle çalıştırma butonu
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Depoyu Klonla
+    - name: Depoyu Kopyala
       uses: actions/checkout@v3
 
-    - name: Python Kurulumu
+    - name: Python Kur
       uses: actions/setup-python@v4
       with:
         python-version: '3.x'
 
     - name: Gerekli Kütüphaneleri Yükle
-      run: |
-        pip install requests
+      run: pip install requests
 
-    - name: Scripti Çalıştır
+    - name: Botu Çalıştır ve Linkleri Yenile
       run: python guncelle.py
 
-    - name: Değişiklikleri GitHub'a Yükle
+    - name: Değişiklikleri GitHub'a Kaydet
       run: |
-        git config --global user.name "GitHub Action"
-        git config --global user.email "action@github.com"
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
         git add iptv_listem.m3u
-        git diff-index --quiet HEAD || git commit -m "IPTV Listesi Güncellendi [Otomatik]"
+        git commit -m "Otomatik Link Güncellemesi" || exit 0
         git push
