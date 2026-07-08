@@ -8,7 +8,7 @@ KAYNAKLAR = [
 
 # -------------------------------------------------------------------------
 # SADECE HAVUZDAN ÇEKİLECEK DİĞER ULUSAL KANALLARIN TAM ADLARI:
-# Bunlar haricindeki tüm gereksiz kanallar otomatik temizlenir.
+# TRT Spor ve CNN Türk'ü yukarıda özel kazıdığımız için bu listeden çıkardık.
 # -------------------------------------------------------------------------
 TUTULACAK_KANALLAR = [
     "TRT 1 (1080p)",
@@ -20,14 +20,12 @@ TUTULACAK_KANALLAR = [
     "TV 8 (1080p)",
     "EuroStar TV (1080p)",
     "TRT Haber (720p)",
-    "CNN Türk",
     "A Haber (1080p)",
     "Habertürk TV (1080p)",
     "NTV (720p) [Not 24/7]",
     "ATV Avrupa (576p) [Not 24/7]",
     "Euro D (720p)",
     "A2TV (1080p)",
-    "TRT Spor (1080p)",
     "A Spor (1080p)",
     "TRT Belgesel (720p)"
 ]
@@ -55,11 +53,9 @@ def trt_spor_guncel_link_bul():
         if response.status_code == 200:
             match = re.search(r'(https://trt\.daioncdn\.net/[^"\']+\.m3u8\?[^"\']+)', response.text)
             if match:
-                guncel_trt = match.group(1).replace("\\/", "/")
-                return guncel_trt
+                return match.group(1).replace("\\/", "/")
     except Exception as e:
         print(f"TRT Spor güncel linki aranırken hata oluştu: {e}")
-    # Siteden çekemezse senin verdiğin o çalışan linki yedek olarak kullanır:
     return "https://trt.daioncdn.net/trtspor/master_720p.m3u8?platform=trtspor&sid=8kbjje2e022o&app=9b65474e-8197-4899-aabb-321fcf6dd9eb&ce=2"
 
 def listeyi_guncelle():
@@ -75,4 +71,45 @@ def listeyi_guncelle():
 {cnn_linki}
 """
     # Mükerrer eklemeyi önlemek için hafızaya alıyoruz
-    ek
+    eklenen_linkler = set([cnn_linki, trt_spor_linki])
+
+    # Diğer ulusal kanalları havuzdan süzerek altına ekliyoruz
+    for url in KAYNAKLAR:
+        try:
+            response = requests.get(url, timeout=15)
+            if response.status_code == 200:
+                satirlar = response.text.split("\n")
+                
+                i = 0
+                while i < len(satirlar):
+                    satir = satirlar[i].strip()
+                    if satir.startswith("#EXTINF"):
+                        extinf_satiri = satir
+                        if i + 1 < len(satirlar):
+                            link_satiri = satirlar[i+1].strip()
+                            
+                            if link_satiri and link_satiri not in eklenen_linkler and not link_satiri.startswith("#"):
+                                kanal_adi_bul = extinf_satiri.split(",")[-1].strip().lower()
+                                
+                                tutulsun_mu = False
+                                for ana_kanal in TUTULACAK_KANALLAR:
+                                    if ana_kanal.strip().lower() == kanal_adi_bul:
+                                        tutulsun_mu = True
+                                        break
+                                
+                                if tutulsun_mu:
+                                    ozel_kanallar += extinf_satiri + "\n" + link_satiri + "\n"
+                                    eklenen_linkler.add(link_satiri)
+                                
+                            i += 1
+                    i += 1
+        except Exception as e:
+            print(f"Havuz çekilirken hata oluştu: {e}")
+
+    # Hepsini tek bir dosyaya yazıp kaydediyoruz
+    with open("iptv_listem.m3u", "w", encoding="utf-8") as f:
+        f.write(ozel_kanallar.strip())
+    print("İşlem başarılı! Liste tamamen güncellendi ve eksikler kapatıldı.")
+
+if __name__ == "__main__":
+    listeyi_guncelle()
