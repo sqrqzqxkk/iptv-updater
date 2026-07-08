@@ -1,11 +1,10 @@
 import requests
-import re
 
-# Ana havuzumuz ve senin verdiğin canavar gibi çalışan sağlam alternatif kaynak
-ANA_HAVUZ = "https://iptv-org.github.io/iptv/countries/tr.m3u"
-HAYAT_IPTV = "https://raw.githubusercontent.com/hayatiptv/iptv/master/index.m3u"
+# Babanın listesi için artık 1. öncelikli ana kaynağımız bu!
+ANA_KAYNAK = "https://raw.githubusercontent.com/hayatiptv/iptv/master/index.m3u"
+YEDEK_HAVUZ = "https://iptv-org.github.io/iptv/countries/tr.m3u"
 
-# Babanın jilet gibi sıralaması
+# Babanın istediği net sıralama
 KANAL_SIRALAMASI = [
     "TRT 1", "ATV", "Kanal D", "NOW TV", "Beyaz TV", "Kanal 7", "TV 8",
     "EuroStar TV", "TRT Haber", "CNN Türk", "A Haber", "Habertürk TV",
@@ -27,18 +26,23 @@ def kanallari_ayıkla(url):
                         link = satirlar[i+1].strip()
                         if link and not link.startswith("#"):
                             # Kanal adını temizle (Örn: "TRT 1 HD" -> "trt 1")
-                            kanal_adi = extinf.split(",")[-1].split("(")[0].split("[")[0].replace("HD", "").replace("FHD", "").strip().lower()
+                            kanal_adi = extinf.split(",")[-1].upper()
+                            kanal_adi = kanal_adi.replace("HD", "").replace("FHD", "").replace("SD", "")
+                            kanal_adi = kanal_adi.replace("(", "").replace(")", "").replace("[", "").replace("]", "")
+                            kanal_adi = kanal_adi.strip().lower()
                             kanallar[kanal_adi] = (extinf, link)
                     i += 1
                 i += 1
     except Exception as e:
-        print(f"{url} çekilirken hata oluştu: {e}")
+        print(f"{url} yüklenirken hata oluştu: {e}")
     return kanallar
 
 def listeyi_guncelle():
-    print("Kanallar kaynaklardan toplanıyor...")
-    havuz_kanallari = kanallari_ayıkla(ANA_HAVUZ)
-    hayat_kanallari = kanallari_ayıkla(HAYAT_IPTV)
+    print("Kanallar taranıyor...")
+    # Önce dün güncellenen o canavar kaynağı tamamen hafızaya alıyoruz
+    ana_kaynak_kanallari = kanallari_ayıkla(ANA_KAYNAK)
+    # Ne olur ne olmaz diye yedek havuzu da kenarda tutuyoruz
+    yedek_havuz_kanallari = kanallari_ayıkla(YEDEK_HAVUZ)
 
     m3u_icerik = "#EXTM3U\n"
     
@@ -46,35 +50,34 @@ def listeyi_guncelle():
         kanal_key = siradaki_kanal.lower()
         bulundu = False
         
-        # 1. ÖNCELİK: Sorun çıkaran TRT ve CNN kanallarını senin verdiğin sağlam listeden çekiyoruz
-        if kanal_key in ["trt 1", "cnn türk", "trt belgesel", "trt spor", "trt haber"]:
-            if kanal_key in hayat_kanallari:
-                extinf, link = hayat_kanallari[kanal_key]
+        # 1. ADIM: Doğrudan dün güncellenen hayatiptv listesinde arıyoruz
+        for kaynak_adi, (extinf, link) in ana_kaynak_kanallari.items():
+            if kanal_key == kaynak_adi or kanal_key in kaynak_adi:
                 m3u_icerik += f"{extinf}\n{link}\n"
+                print(f"✓ {siradaki_kanal} -> Güncel Ana Kaynaktan Eklendi.")
                 bulundu = True
-                print(f"✓ {siradaki_kanal} HayatIPTV kaynağından başarıyla çekildi.")
-        
-        # 2. ÖNCELİK: Eğer orada yoksa veya diğer ulusal kanallarsa ana havuzdan çekiyoruz
-        if not bulundu:
-            # Tam veya kısmi eşleşme kontrolü
-            for havuz_adi, (extinf, link) in havuz_kanallari.items():
-                if kanal_key == havuz_adi or kanal_key in havuz_adi:
+                break
+                
+        # 2. ADIM: Eğer ana kaynakta o kanal yoksa yedek havuzdan tamamlıyoruz
+        if not disbanded and not bulundu:
+            for yedek_adi, (extinf, link) in yedek_havuz_kanallari.items():
+                if kanal_key == yedek_adi or kanal_key in yedek_adi:
                     m3u_icerik += f"{extinf}\n{link}\n"
+                    print(f"⚠ {siradaki_kanal} -> Ana kaynakta yoktu, yedek havuzdan tamamlandı.")
                     bulundu = True
-                    print(f"✓ {siradaki_kanal} Ana havuzdan çekildi.")
                     break
-                    
-        # 3. ÖNCELİK: İki tarafta da anlık sorun olursa sistem kararmasın diye kemik yedekler
+
+        # 3. ADIM: İki tarafta da bulunamazsa sistem çökmesin diye kemik link çakıyoruz
         if not bulundu:
             if "trt 1" in kanal_key:
                 m3u_icerik += '#EXTINF:-1 tvg-id="TRT1.tr" tvg-name="TRT 1",TRT 1\nhttps://tv-trt1avrupa.medya.trt.com.tr/master.m3u8\n'
             elif "cnn türk" in kanal_key:
                 m3u_icerik += '#EXTINF:-1 tvg-id="CNNTurk.tr" tvg-name="CNN Türk",CNN Türk\nhttps://live.duhnet.tv/S2/HLS_LIVE/cnnturknp/track_4_1000/playlist.m3u8?&live=true\n'
 
-    # Dosyayı kaydet
+    # Yeni listeyi basıyoruz
     with open("iptv_listem.m3u", "w", encoding="utf-8") as f:
         f.write(m3u_icerik.strip())
-    print("Mükemmel! İki kaynağın en stabil kanalları birleştirildi ve liste güncellendi.")
+    print("Mükemmel! Liste tamamen güncel hayatiptv odaklı olarak baştan inşa edildi.")
 
 if __name__ == "__main__":
     listeyi_guncelle()
