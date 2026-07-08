@@ -1,6 +1,6 @@
 #EXTM3U
 #EXTINF:3228,TRT 1
-http://176.65.146.171:9981/stream/channelid/838617424?profile=htsp
+https://tv-trt1.medya.trt.com.tr/master_720.m3u8
 #EXTINF:-1,ALANYA ATV
 https://helga.iptv2022.com/sh/AlanyaTV/tracks-v1a1/mono.m3u8
 #EXTINF:-1 Yedek="http://live.duhnet.tv/S2/HLS_LIVE/kanalddainp/track_4_1250/playlist.m3u8" Yedek2="http://89.187.191.41/Kanal-D-HD-TR/video.m3u8" Yedek3="https://ackaxsqacw.turknet.ercdn.net/ozfkfbbjba/kanald/kanald_1080p.m3u8" Yedek4="http://176.65.146.171:9981/stream/channelid/23410162?profile=htsp" Yedek5="http://c3921155.edmonst.net/iptv/DVHP2VB5QXL7UC/2326/index.m3u8" Yedek6="https://vavoo.ahkm.workers.dev/?ID=1130441933d454b324b033" Yedek7="http://95.174.71.114/TR-KANAL-D/index.m3u8" tvg-id="KANAL D HD.tr" tvg-logo="https://i.ibb.co/hf2mSz5/kanal-d.png" group-title="ULUSAL",KANAL D
