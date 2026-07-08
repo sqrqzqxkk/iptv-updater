@@ -1,12 +1,6 @@
 #EXTM3U
-#EXTINF:-1 tvg-id="TRT1.tr" tvg-name="TRT 1" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/TRT_1_logo_%282021-%29.svg/960px-TRT_1_logo_%282021-%29.svg.png",TRT 1 (Sabit - Engelsiz)
-https://hls.netmon.org/trt1/index.m3u8
-#EXTINF:-1 tvg-id="CNNTurk.tr" tvg-name="CNN Türk" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/0/09/CNN_T%C3%BCrk_logo.png",CNN Türk (Sabit - Engelsiz)
-https://hls.netmon.org/cnnturk/index.m3u8
-#EXTINF:-1 tvg-id="TRTBelgesel.tr" tvg-name="TRT Belgesel" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/TRT_Belgesel_logo_%282019-%29.svg/960px-TRT_Belgesel_logo_%282019-%29.svg.png",TRT Belgesel (Sabit - Engelsiz)
-https://hls.netmon.org/trtbelgesel/index.m3u8
-#EXTINF:-1 tvg-id="TRTSpor.tr" tvg-name="TRT Spor" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/e/ec/TRT_Spor_logo.png",TRT Spor (Sabit - Engelsiz)
-https://hls.netmon.org/trtspor/index.m3u8
+#EXTINF:3228,TRT 1
+https://tv-trt1.medya.trt.com.tr/master_720.m3u8
 #EXTINF:-1 tvg-id="ATV.tr@SD" tvg-logo="https://i.imgur.com/HyVUwFC.png" group-title="General",ATV (1080p)
 https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv_1080p.m3u8
 #EXTINF:-1 tvg-id="KanalD.tr@SD" tvg-logo="https://i.imgur.com/9o1atM6.png" group-title="General",Kanal D (1080p)
@@ -21,8 +15,10 @@ https://kanal7-live.daioncdn.net/kanal7/kanal7.m3u8
 https://tv8.daioncdn.net/tv8/tv8.m3u8?app=7ddc255a-ef47-4e81-ab14-c0e5f2949788&ce=3
 #EXTINF:-1 tvg-id="EuroStar.tr@SD" tvg-logo="https://i.imgur.com/kb165Ot.png" group-title="Entertainment",EuroStar TV (1080p)
 https://canlitvulusal.xyz/live/eurostar/index.m3u8
-#EXTINF:-1 tvg-id="TRTHaber.tr@SD" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/TRT_Haber_Eyl%C3%BCl_2020_Logo.svg/960px-TRT_Haber_Eyl%C3%BCl_2020_Logo.svg.png" group-title="News",TRT Haber (720p)
-https://tv-trthaber.medya.trt.com.tr/master.m3u8
+#EXTINF:-1 Yedek="https://tv-trthaber.medya.trt.com.tr/master_720.m3u8" Yedek2="http://89.36.94.225:80/956bassem/BHrMOpKtyb/1636" Yedek3="" tvg-id="TRT HABER HD.tr" tvg-logo="https://logowik.com/content/uploads/images/trt-haber5539.jpg" group-title="ULUSAL",TRT HABER
+https://tv-trthaber.medya.trt.com.tr/master_720.m3u8
+#EXTINF:-1 tvg-id="CNNTurk.tr" tvg-name="CNN Türk",CNN Türk
+https://live.duhnet.tv/S2/HLS_LIVE/cnnturknp/track_4_1000/playlist.m3u8?&live=true
 #EXTINF:-1 tvg-id="AHaber.tr@SD" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/7/7c/Ahaber_Logo.png" group-title="News",A Haber (1080p)
 https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/ahaber/ahaber.m3u8
 #EXTINF:-1 tvg-id="HaberturkTV.tr@SD" tvg-logo="https://i.imgur.com/6Tw3rUp.png" group-title="News",Habertürk TV (1080p)
@@ -35,5 +31,9 @@ https://streamer2.nexgen.bz/ATV/index.m3u8
 https://live.duhnet.tv/S2/HLS_LIVE/eurodnp/playlist.m3u8
 #EXTINF:-1 tvg-id="A2TV.tr@SD" tvg-logo="https://iatv.tmgrup.com.tr/site/v2/a2tv/i/a2tv-logo.png" group-title="General",A2TV (1080p)
 https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/a2tv/a2tv.m3u8
+#EXTINF:-1 Yedek="http://78.128.125.60:9980/play/a01n/index.m3u8" Yedek2="https://helga.iptv2022.com/sh/trt_spor/tracks-v3a1/mono.m3u8?filter.tracks=a1v1v2v3v4" Yedek3="https://iptv-worker.mark-clark.workers.dev/?ID=20" Yedek4="http://31.222.206.98/8827/tracks-v1a1/mono.ts.m3u8?token=test" Yedek5="https://trn03.tulix.tv/gt-trtspor1/index.m3u8" Yedek6="http://176.65.146.171:9981/stream/channelid/835819132?profile=htsp" Yedek7="http://85.209.248.3:9897/trt3spor" tvg-id="TRT SPOR HD.tr" tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNu1KowYW0Ywy_-lMPzCvLGBMUaNIUAUIcwGGX1iLjHzhRclixpxWjf4lLG9QeYDPg754&usqp=CAU" group-title="ULUSAL",TRT SPOR
+http://176.65.146.171:9981/stream/channelid/835819132?profile=htsp
 #EXTINF:-1 tvg-id="ASpor.tr@SD" tvg-logo="https://i.imgur.com/ZhkZzLf.png" group-title="Sports",A Spor (1080p)
 https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8
+#EXTINF:-1 tvg-id="TRTBelgesel.tr@SD" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/TRT_Belgesel_logo_%282019-%29.svg/960px-TRT_Belgesel_logo_%282019-%29.svg.png" group-title="Documentary",TRT Belgesel (720p)
+https://tv-trtbelgesel.medya.trt.com.tr/master.m3u8
