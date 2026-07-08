@@ -1,14 +1,14 @@
 import requests
 import re
 
-# Ana kaynak listemiz (Diğer ulusal kanalları buradan çekeceğiz)
+# Ana kaynak listemiz
 KAYNAKLAR = [
     "https://iptv-org.github.io/iptv/countries/tr.m3u"
 ]
 
 # -------------------------------------------------------------------------
-# SADECE HAVUZDAN ÇEKİLECEK DİĞER ULUSAL KANALLARIN TAM ADLARI:
-# TRT Spor ve CNN Türk'ü yukarıda özel kazıdığımız için bu listeden çıkardık.
+# BURADAKİ SIRALAMA TELEVİZYONDA BİREBİR AYNI ŞEKİLDE ÇIKACAK kanka:
+# TRT 1 birinci sırada, ATV ikinci sırada olacak şekilde ayarlandı.
 # -------------------------------------------------------------------------
 TUTULACAK_KANALLAR = [
     "TRT 1 (1080p)",
@@ -31,7 +31,6 @@ TUTULACAK_KANALLAR = [
 ]
 
 def cnn_turk_guncel_link_bul():
-    """ CNN Türk sitesinden o anki şifreli güncel linki bulur """
     try:
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
         url = "https://www.cnnturk.com/canli-yayin"
@@ -45,7 +44,6 @@ def cnn_turk_guncel_link_bul():
     return "https://live.duhnet.tv//S2/HLS_LIVE/cnnturknp/track_4_1000/playlist.m3u8?&live=true&app=com.cnnturk&st=gh1YgWG5Ifcpkn-rXNwCnQ&e=1783535182"
 
 def trt_spor_guncel_link_bul():
-    """ TRT Spor sitesinden o anki şifreli güncel daioncdn linkini bulur """
     try:
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
         url = "https://www.trtspor.com.tr/canli-yayin-izle/trt-spor"
@@ -59,27 +57,17 @@ def trt_spor_guncel_link_bul():
     return "https://trt.daioncdn.net/trtspor/master_720p.m3u8?platform=trtspor&sid=8kbjje2e022o&app=9b65474e-8197-4899-aabb-321fcf6dd9eb&ce=2"
 
 def listeyi_guncelle():
-    # Sitelerden en taze dinamik linkleri çekiyoruz
     cnn_linki = cnn_turk_guncel_link_bul()
     trt_spor_linki = trt_spor_guncel_link_bul()
 
-    # TRT Spor ve CNN Türk'ü listenin en tepesine jilet gibi ekliyoruz
-    ozel_kanallar = f"""#EXTM3U
-#EXTINF:-1 tvg-id="TRTSpor.tr" tvg-name="TRT Spor" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/e/ec/TRT_Spor_logo.png",TRT Spor
-{trt_spor_linki}
-#EXTINF:-1 tvg-id="CNNTurk.tr" tvg-name="CNN Türk" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/0/09/CNN_T%C3%BCrk_logo.png",CNN Türk
-{cnn_linki}
-"""
-    # Mükerrer eklemeyi önlemek için hafızaya alıyoruz
-    eklenen_linkler = set([cnn_linki, trt_spor_linki])
-
-    # Diğer ulusal kanalları havuzdan süzerek altına ekliyoruz
+    # Önce havuzdaki tüm kanalları geçici bir hafızaya (sözlüğe) topluyoruz
+    havuz_kanallari = {}
+    
     for url in KAYNAKLAR:
         try:
             response = requests.get(url, timeout=15)
             if response.status_code == 200:
                 satirlar = response.text.split("\n")
-                
                 i = 0
                 while i < len(satirlar):
                     satir = satirlar[i].strip()
@@ -87,29 +75,39 @@ def listeyi_guncelle():
                         extinf_satiri = satir
                         if i + 1 < len(satirlar):
                             link_satiri = satirlar[i+1].strip()
-                            
-                            if link_satiri and link_satiri not in eklenen_linkler and not link_satiri.startswith("#"):
-                                kanal_adi_bul = extinf_satiri.split(",")[-1].strip().lower()
-                                
-                                tutulsun_mu = False
-                                for ana_kanal in TUTULACAK_KANALLAR:
-                                    if ana_kanal.strip().lower() == kanal_adi_bul:
-                                        tutulsun_mu = True
-                                        break
-                                
-                                if tutulsun_mu:
-                                    ozel_kanallar += extinf_satiri + "\n" + link_satiri + "\n"
-                                    eklenen_linkler.add(link_satiri)
-                                
+                            if link_satiri and not link_satiri.startswith("#"):
+                                kanal_adi = extinf_satiri.split(",")[-1].strip().lower()
+                                havuz_kanallari[kanal_adi] = (extinf_satiri, link_satiri)
                             i += 1
                     i += 1
         except Exception as e:
             print(f"Havuz çekilirken hata oluştu: {e}")
 
-    # Hepsini tek bir dosyaya yazıp kaydediyoruz
+    # Dosya yazma sırasını burası belirliyor
+    ozel_kanallar = "#EXTM3U\n"
+    eklenen_linkler = set()
+
+    # SIRALAMA MOTORU: Kanalları senin listedeki sırayla tek tek çeker
+    for aranacak_kanal in TUTULACAK_KANALLAR:
+        kanal_key = aranacak_kanal.strip().lower()
+        
+        # Havuzda bu isimde kanal varsa sırayla listeye ekle
+        if kanal_key in havuz_kanallari:
+            extinf, link = havuz_kanallari[kanal_key]
+            if link not in eklenen_linkler:
+                ozel_kanallar += extinf + "\n" + link + "\n"
+                eklenen_linkler.add(link)
+
+    # Canlı sitelerden kazınan TRT Spor ve CNN Türk'ü de listenin EN ALTINA ekliyoruz.
+    # (Eğer listenin EN BAŞINDA olmasını istersen bu iki bloğu yukarıdaki #EXTM3U satırının hemen altına taşıyabiliriz kanka)
+    if trt_spor_linki not in eklenen_linkler:
+        ozel_kanallar += f'#EXTINF:-1 tvg-id="TRTSpor.tr" tvg-name="TRT Spor" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/e/ec/TRT_Spor_logo.png",TRT Spor\n{trt_spor_linki}\n'
+    if cnn_linki not in eklenen_linkler:
+        ozel_kanallar += f'#EXTINF:-1 tvg-id="CNNTurk.tr" tvg-name="CNN Türk" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/0/09/CNN_T%C3%BCrk_logo.png",CNN Türk\n{cnn_linki}\n'
+
     with open("iptv_listem.m3u", "w", encoding="utf-8") as f:
         f.write(ozel_kanallar.strip())
-    print("İşlem başarılı! Liste tamamen güncellendi ve eksikler kapatıldı.")
+    print("İşlem başarılı! Kanallar listendeki sırayla jilet gibi dizildi.")
 
 if __name__ == "__main__":
     listeyi_guncelle()
